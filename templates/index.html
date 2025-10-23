@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>QR Code Generator</title>
     <style>
         body {
@@ -139,11 +142,12 @@
         }
     </style>
 </head>
-<body>
+<body data-fresh-generation="{% if session.get('fresh_generation', False) %}true{% else %}false{% endif %}" data-page-id="{{ page_id or 0 }}">
     <div class="container">
         <h1>QR Code Generator</h1>
         
-        <form action="/" method="post" enctype="multipart/form-data">
+        <form id="qr-form" enctype="multipart/form-data">
+            <input type="hidden" name="ajax" value="1">
             <label for="text">Enter text to encode:</label>
             <input type="text" id="text" name="text" required 
                    placeholder="Enter any text, URL, or message" 
@@ -162,18 +166,95 @@
         <div class="error">{{ error }}</div>
         {% endif %}
         
-        {% if qr_generated %}
-        <div class="qr-container">
-            <div class="success">QR Code generated successfully!</div>
-            <img src="/qr" alt="Generated QR Code" style="margin-top: 20px;">
-            <div class="qr-text">
-                <strong>Encoded Text:</strong> {{ session.get('qr_text', '') }}
-            </div>
-            <div class="download-container">
-                <a href="/qr" download="qrcode.png" class="download-btn">Download QR Code</a>
-            </div>
-        </div>
-        {% endif %}
+        <div id="qr-result"></div>
     </div>
+    <script>
+        // Clear any browser storage that might interfere
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Handle form submission with AJAX
+        document.getElementById('qr-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.textContent;
+            
+            // Show loading state
+            submitButton.textContent = 'Generating...';
+            submitButton.disabled = true;
+            
+            // Clear any previous results
+            document.getElementById('qr-result').innerHTML = '';
+            
+            // Remove any existing error messages
+            const existingError = document.querySelector('.error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Send AJAX request
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show QR code
+                    const qrHtml = `
+                        <div class="qr-container">
+                            <div class="success">QR Code generated successfully!</div>
+                            <img src="/qr?t=${Date.now()}" alt="Generated QR Code" style="margin-top: 20px;">
+                            <div class="qr-text">
+                                <strong>Encoded Text:</strong> ${data.text}
+                            </div>
+                            <div class="download-container">
+                                <a href="/qr" download="qrcode.png" class="download-btn">Download QR Code</a>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('qr-result').innerHTML = qrHtml;
+                } else {
+                    // Show error
+                    const errorHtml = `<div class="error">${data.error}</div>`;
+                    document.querySelector('.container').insertAdjacentHTML('beforeend', errorHtml);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const errorHtml = `<div class="error">An error occurred while generating the QR code.</div>`;
+                document.querySelector('.container').insertAdjacentHTML('beforeend', errorHtml);
+            })
+            .finally(() => {
+                // Reset button state
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            });
+        });
+        
+        // Clear QR code on page refresh
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clear any QR results on page load/refresh
+            document.getElementById('qr-result').innerHTML = '';
+            
+            // Reset form
+            document.getElementById('qr-form').reset();
+        });
+        
+        // Handle browser back/forward navigation
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Page was loaded from cache - clear QR code
+                document.getElementById('qr-result').innerHTML = '';
+                document.getElementById('qr-form').reset();
+            }
+        });
+    </script>
 </body>
 </html>

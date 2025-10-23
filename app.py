@@ -1,4 +1,4 @@
-﻿from flask import Flask, render_template, request, send_file, session, make_response
+﻿from flask import Flask, render_template, request, send_file, session, make_response, redirect
 from io import BytesIO
 import qrcode
 from PIL import Image
@@ -26,15 +26,16 @@ def cleanup_old_qr_files():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        # Clear any existing QR code data on page load/refresh
-        session.pop('qr_filename', None)
-        session.pop('qr_generated', None)
-        session.pop('qr_text', None)
-        session.pop('error', None)
+        # Clear any session data on GET requests
+        session.clear()
         
-        return render_template('index.html', 
-                             error=None,
-                             qr_generated=False)
+        response = make_response(render_template('index.html', 
+                         error=None))
+        # Prevent page caching
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
     
     # POST request - generate QR code
     # Clean up old temporary files
@@ -42,15 +43,20 @@ def index():
     
     text = request.form.get('text', '').strip()
     
+    # Check if this is an AJAX request
+    is_ajax = request.form.get('ajax') == '1'
+    
     if not text:
+        if is_ajax:
+            return {'success': False, 'error': 'Please enter some text to encode.'}
         session['error'] = 'Please enter some text to encode.'
-        session['qr_generated'] = False
-        return render_template('index.html', error=session['error'], qr_generated=False)
+        return render_template('index.html', error=session['error'])
     
     if len(text) > 1000:
+        if is_ajax:
+            return {'success': False, 'error': 'Text is too long. Maximum 1000 characters allowed.'}
         session['error'] = 'Text is too long. Maximum 1000 characters allowed.'
-        session['qr_generated'] = False
-        return render_template('index.html', error=session['error'], qr_generated=False)
+        return render_template('index.html', error=session['error'])
     
     try:
         # Generate QR code
@@ -74,9 +80,10 @@ def index():
         if logo_file and logo_file.filename:
             # Validate file type
             if not logo_file.filename.lower().endswith('.png'):
+                if is_ajax:
+                    return {'success': False, 'error': 'Only PNG files are allowed for logos.'}
                 session['error'] = 'Only PNG files are allowed for logos.'
-                session['qr_generated'] = False
-                return render_template('index.html', error=session['error'], qr_generated=False)
+                return render_template('index.html', error=session['error'])
             
             try:
                 # Open and process logo
@@ -110,30 +117,44 @@ def index():
                 qr_pil.paste(logo_img, (x, y), logo_img if logo_img.mode == 'RGBA' else None)
                 
             except Exception as logo_error:
+                if is_ajax:
+                    return {'success': False, 'error': f'Error processing logo: {str(logo_error)}'}
                 session['error'] = f'Error processing logo: {str(logo_error)}'
-                session['qr_generated'] = False
-                return render_template('index.html', error=session['error'], qr_generated=False)
+                return render_template('index.html', error=session['error'])
         
         # Convert back to RGB for PNG output
         final_img = qr_pil.convert('RGB')
         
-        # Save to temporary file instead of session
+        # Save to temporary file
         temp_filename = f"qr_{uuid.uuid4().hex}.png"
         temp_filepath = os.path.join(tempfile.gettempdir(), temp_filename)
         final_img.save(temp_filepath, format='PNG')
         
-        # Store only the filename in session
+        # Store in session for serving
         session['qr_filename'] = temp_filename
-        session['qr_text'] = text  # Store the encoded text
-        session['qr_generated'] = True
-        session.pop('error', None)
+        session['qr_text'] = text
+        session['timestamp'] = int(time.time() * 1000)
         
-        return render_template('index.html', qr_generated=True)
+        # Check if this is an AJAX request
+        if is_ajax:
+            # Return JSON response for AJAX
+            return {
+                'success': True,
+                'text': text,
+                'filename': temp_filename
+            }
+        else:
+            # Fallback for non-AJAX requests (redirect)
+            session['fresh_generation'] = True
+            session['qr_generated'] = True
+            session.pop('error', None)
+            return redirect('/', code=303)
         
     except Exception as e:
+        if is_ajax:
+            return {'success': False, 'error': f'Error generating QR code: {str(e)}'}
         session['error'] = f'Error generating QR code: {str(e)}'
-        session['qr_generated'] = False
-        return render_template('index.html', error=session['error'], qr_generated=False)
+        return render_template('index.html', error=session['error'])
 
 @app.route('/qr')
 def get_qr():
