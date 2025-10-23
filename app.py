@@ -23,19 +23,20 @@ def cleanup_old_qr_files():
             except (OSError, FileNotFoundError):
                 pass
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    # Clear any existing QR code data on page load/refresh
-    session.pop('qr_filename', None)
-    session.pop('qr_generated', None)
-    session.pop('error', None)
+    if request.method == 'GET':
+        # Clear any existing QR code data on page load/refresh
+        session.pop('qr_filename', None)
+        session.pop('qr_generated', None)
+        session.pop('qr_text', None)
+        session.pop('error', None)
+        
+        return render_template('index.html', 
+                             error=None,
+                             qr_generated=False)
     
-    return render_template('index.html', 
-                         error=None,
-                         qr_generated=False)
-
-@app.route('/generate', methods=['POST'])
-def generate_qr():
+    # POST request - generate QR code
     # Clean up old temporary files
     cleanup_old_qr_files()
     
@@ -123,6 +124,7 @@ def generate_qr():
         
         # Store only the filename in session
         session['qr_filename'] = temp_filename
+        session['qr_text'] = text  # Store the encoded text
         session['qr_generated'] = True
         session.pop('error', None)
         
