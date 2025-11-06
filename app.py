@@ -180,7 +180,3 @@ if __name__ == '__main__':
     # Local development server
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
-
-# When deploying on a production host (for example Hugging Face Spaces using gunicorn),
-# do NOT call `app.run()` here. The WSGI server (gunicorn) will import the `app`
-# object from this module and manage the HTTP server itself.
