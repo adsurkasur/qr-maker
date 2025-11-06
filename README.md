@@ -1,14 +1,31 @@
-﻿# QR Code Generator
+﻿---
+title: QR Code Generator
+emoji: 🎨
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_file: app.py
+pinned: false
+---
 
-A simple web application that generates QR codes in PNG format using Python Flask.
+# 🎨 QR Code Generator
 
-## Features
+A beautiful web application that generates custom QR codes with logo overlay using Python Flask.
 
-- Generate QR codes from any text input
-- PNG format output
-- Simple web interface
-- Downloadable QR codes
-- Input validation and error handling
+## ✨ Features
+
+- 🎯 Generate QR codes from any text input (URLs, messages, etc.)
+- 🖼️ Add custom PNG logos to QR codes
+- 📱 Modern, responsive web interface
+- 📥 Download QR codes as PNG files
+- 📋 Copy encoded text to clipboard
+- 🎭 Drag & drop logo upload
+- ⚡ AJAX-powered for instant results
+- 📱 Mobile-friendly design
+
+## 🚀 Live Demo
+
+This app can be deployed instantly on [Hugging Face Spaces](https://huggingface.co/spaces) for free!
 
 ## Installation
 
@@ -119,16 +136,32 @@ python app.py
 
 3. Open your web browser and navigate to `http://localhost:5000`
 
-## Deployment on Hugging Face Spaces
+## 🚀 Deploy to Hugging Face Spaces
 
-This application can be deployed on Hugging Face Spaces for free hosting:
+### Quick Deploy (2 minutes)
 
-1. Create a new Space on [Hugging Face](https://huggingface.co/spaces)
-2. Choose "Docker" as the SDK
-3. Upload all files from this repository
-4. The Space will automatically build and deploy your QR code generator
+1. **Go to [Hugging Face Spaces](https://huggingface.co/spaces)**
+2. **Click "Create new Space"**
+3. **Fill in details:**
+   - **Space name**: `qr-code-generator` (or your choice)
+   - **License**: MIT
+   - **SDK**: Docker
+   - **Visibility**: Public
+4. **Upload files** from this repository
+5. **Deploy** - Hugging Face handles everything automatically!
 
-See `DEPLOYMENT.md` for detailed instructions.
+### Your Live App URL
+```
+https://[your-username]-qr-code-generator.hf.space
+```
+
+### Files to Upload
+- ✅ `app.py` - Flask application
+- ✅ `requirements.txt` - Dependencies
+- ✅ `Dockerfile` - Container config
+- ✅ `README.md` - Space metadata
+- ✅ `templates/index.html` - UI
+- ✅ `.gitattributes` - File handling
 
 ## Local Development
 
