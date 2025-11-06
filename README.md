@@ -3,7 +3,7 @@ title: QR Code Generator
 emoji: 🎨
 colorFrom: blue
 colorTo: purple
-sdk: docker
+sdk: static
 app_file: app.py
 pinned: false
 ---
