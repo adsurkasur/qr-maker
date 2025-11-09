@@ -6,9 +6,13 @@ import os
 import tempfile
 import uuid
 import time
+import base64
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this-in-production'
+
+# In-memory storage for QR codes (better for containerized environments)
+qr_storage = {}
 
 def cleanup_old_qr_files():
     """Clean up old QR code temporary files"""
@@ -22,6 +26,17 @@ def cleanup_old_qr_files():
                     os.remove(filepath)
             except (OSError, FileNotFoundError):
                 pass
+
+def cleanup_qr_storage():
+    """Clean up old QR codes from memory storage"""
+    current_time = time.time()
+    expired_keys = []
+    for key, data in qr_storage.items():
+        if current_time - data['timestamp'] > 3600:  # 1 hour
+            expired_keys.append(key)
+    
+    for key in expired_keys:
+        del qr_storage[key]
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -125,13 +140,26 @@ def index():
         # Convert back to RGB for PNG output
         final_img = qr_pil.convert('RGB')
         
-        # Save to temporary file
-        temp_filename = f"qr_{uuid.uuid4().hex}.png"
-        temp_filepath = os.path.join(tempfile.gettempdir(), temp_filename)
-        final_img.save(temp_filepath, format='PNG')
+        # Save to BytesIO for in-memory storage
+        img_buffer = BytesIO()
+        final_img.save(img_buffer, format='PNG')
+        img_buffer.seek(0)
         
-        # Store in session for serving
-        session['qr_filename'] = temp_filename
+        # Generate unique ID for this QR code
+        qr_id = str(uuid.uuid4())
+        
+        # Store in memory with timestamp
+        qr_storage[qr_id] = {
+            'data': img_buffer.getvalue(),
+            'text': text,
+            'timestamp': time.time()
+        }
+        
+        # Clean up old QR codes from memory
+        cleanup_qr_storage()
+        
+        # Store ID in session for serving
+        session['qr_id'] = qr_id
         session['qr_text'] = text
         session['timestamp'] = int(time.time() * 1000)
         
@@ -141,7 +169,7 @@ def index():
             return {
                 'success': True,
                 'text': text,
-                'filename': temp_filename
+                'qr_id': qr_id
             }
         else:
             # Fallback for non-AJAX requests (redirect)
@@ -158,18 +186,22 @@ def index():
 
 @app.route('/qr')
 def get_qr():
-    if 'qr_filename' not in session:
+    if 'qr_id' not in session:
         return 'No QR code available. Please generate one first.', 404
     
-    temp_filepath = os.path.join(tempfile.gettempdir(), session['qr_filename'])
+    qr_id = session['qr_id']
     
-    if not os.path.exists(temp_filepath):
-        # Clean up session if file doesn't exist
-        session.pop('qr_filename', None)
-        session.pop('qr_generated', None)
+    if qr_id not in qr_storage:
+        # Clean up session if QR code doesn't exist
+        session.pop('qr_id', None)
         return 'QR code expired. Please generate a new one.', 404
     
-    response = send_file(temp_filepath, mimetype='image/png', as_attachment=False, download_name='qrcode.png')
+    qr_data = qr_storage[qr_id]['data']
+    
+    # Create response from memory
+    response = make_response(qr_data)
+    response.headers.set('Content-Type', 'image/png')
+    response.headers.set('Content-Disposition', 'attachment', filename='qrcode.png')
     # Disable caching
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'
