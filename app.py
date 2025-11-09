@@ -41,8 +41,10 @@ def cleanup_qr_storage():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        # Clear any session data on GET requests
-        session.clear()
+        # Only clear session if there's no active QR generation
+        # and this isn't an AJAX request or image load
+        if not session.get('qr_id') and not request.args.get('t'):
+            session.clear()
         
         response = make_response(render_template('index.html', 
                          error=None))
@@ -186,10 +188,11 @@ def index():
 
 @app.route('/qr')
 def get_qr():
-    if 'qr_id' not in session:
-        return 'No QR code available. Please generate one first.', 404
+    # Try to get qr_id from URL parameter first, then fall back to session
+    qr_id = request.args.get('id') or session.get('qr_id')
     
-    qr_id = session['qr_id']
+    if not qr_id:
+        return 'No QR code available. Please generate one first.', 404
     
     if qr_id not in qr_storage:
         # Clean up session if QR code doesn't exist
@@ -201,7 +204,13 @@ def get_qr():
     # Create response from memory
     response = make_response(qr_data)
     response.headers.set('Content-Type', 'image/png')
-    response.headers.set('Content-Disposition', 'attachment', filename='qrcode.png')
+    
+    # Check if this is a download request (has download parameter) or image display
+    if request.args.get('download') == '1':
+        response.headers.set('Content-Disposition', 'attachment', filename='qrcode.png')
+    else:
+        response.headers.set('Content-Disposition', 'inline', filename='qrcode.png')
+    
     # Disable caching
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     response.headers['Pragma'] = 'no-cache'

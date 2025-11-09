@@ -526,13 +526,13 @@
                             ✨ QR Code generated successfully!
                         </div>
                         <div class="qr-display">
-                            <img src="/qr?t=${Date.now()}" alt="Generated QR Code" class="qr-code">
+                            <img src="/qr?id=${data.qr_id}&t=${Date.now()}" alt="Generated QR Code" class="qr-code">
                             <div class="qr-info">
                                 <strong>📝 Encoded Text:</strong>
                                 <div class="text-content">${data.text}</div>
                             </div>
                             <div class="download-section">
-                                <a href="/qr" download="qrcode.png" class="download-btn">
+                                <a href="/qr?id=${data.qr_id}&download=1" download="qrcode.png" class="download-btn">
                                     📥 Download PNG
                                 </a>
                                 <button onclick="navigator.clipboard.writeText('${data.text}')" class="download-btn">
