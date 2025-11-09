@@ -535,7 +535,7 @@
                                 <a href="/qr?id=${data.qr_id}&download=1" download="qrcode.png" class="download-btn">
                                     📥 Download PNG
                                 </a>
-                                <button onclick="navigator.clipboard.writeText('${data.text}')" class="download-btn">
+                                <button onclick="copyToClipboard('${data.text}')" class="download-btn" id="copy-btn">
                                     📋 Copy Text
                                 </button>
                             </div>
@@ -598,7 +598,57 @@
             input.addEventListener('blur', function() {
                 this.parentElement.style.transform = 'translateY(0)';
             });
-        });
+        // Copy text to clipboard function
+        async function copyToClipboard(text) {
+            const copyBtn = document.getElementById('copy-btn');
+            const originalText = copyBtn.innerHTML;
+            
+            try {
+                // Try modern clipboard API first
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                } else {
+                    // Fallback for older browsers or non-HTTPS
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                    } finally {
+                        document.body.removeChild(textArea);
+                    }
+                }
+                
+                // Show success feedback
+                copyBtn.innerHTML = '✅ Copied!';
+                copyBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.style.background = '';
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                
+                // Show error feedback
+                copyBtn.innerHTML = '❌ Failed to copy';
+                copyBtn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.style.background = '';
+                }, 2000);
+            }
+        }
     </script>
 
     <!-- Footer with Social Links and Credits -->
