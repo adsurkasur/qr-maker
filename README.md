@@ -27,6 +27,57 @@ A beautiful web application that generates custom QR codes with logo overlay usi
 
 This app can be deployed instantly on [Hugging Face Spaces](https://huggingface.co/spaces) for free!
 
+## 🌐 Custom Domain Setup
+
+### Option 1: Hugging Face Spaces Custom Domain (Recommended)
+
+1. **Go to your Space Settings**:
+   - Visit your Hugging Face Space
+   - Click the "Settings" tab
+   - Scroll down to "Custom Domain"
+
+2. **Add your domain**:
+   - Enter your domain name (e.g., `qr.yourdomain.com`)
+   - Click "Add Domain"
+
+3. **Configure DNS**:
+   - Hugging Face will provide CNAME records
+   - Add these records to your domain's DNS settings
+
+### Option 2: Direct CNAME (Alternative)
+
+If Hugging Face's built-in custom domain isn't available:
+
+1. **Get your Space URL**:
+   - Your Space URL: `https://[username]-[space-name].hf.space`
+
+2. **Configure DNS**:
+   - Add a CNAME record pointing to: `[username]-[space-name].hf.space`
+   - For example: `qr.yourdomain.com CNAME [username]-[space-name].hf.space`
+
+3. **SSL Certificate**:
+   - Hugging Face automatically provides SSL certificates
+   - Your custom domain will be HTTPS-enabled
+
+### Option 3: Cloudflare Pages (Advanced)
+
+For more control over routing and caching:
+
+1. **Create a Cloudflare Pages project**
+2. **Set up as a reverse proxy**:
+   ```javascript
+   // _redirects file
+   /* https://[username]-[space-name].hf.space/:splat 200
+   ```
+
+3. **Configure custom domain in Cloudflare**
+
+## 📋 Domain Requirements
+
+- **Domain Ownership**: You must own the domain
+- **DNS Access**: Ability to modify DNS records
+- **Propagation Time**: DNS changes take 24-48 hours to propagate
+
 ## Installation
 
 1. Clone or download this repository
