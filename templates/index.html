@@ -79,6 +79,12 @@
     <footer class="footer">
         <div class="footer-inner">
             <p class="footer-author">Created by <strong>adsurkasur</strong></p>
+            <button type="button" class="btn-donate" id="donate-btn">
+                <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                Support Me
+            </button>
             <div class="social-links">
                 <a href="https://github.com/adsurkasur/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="GitHub">
                     <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
@@ -93,6 +99,229 @@
             <p class="footer-copyright">Made with Flask & QRCode</p>
         </div>
     </footer>
+
+    <!-- QRIS Modal -->
+    <div class="modal-overlay" id="qris-modal">
+        <div class="modal-container qris-modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                    </svg>
+                    QRIS
+                </div>
+                <button type="button" class="modal-close" id="qris-modal-close">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body qris-modal-body">
+                <img src="https://purple-given-lark-169.mypinata.cloud/ipfs/bafkreihplwmmtmq6youvqcfpiks4mffrdzc54h5ymqhfiq63bzzjfdiugq" alt="QRIS Payment" class="qris-image">
+                <a href="https://purple-given-lark-169.mypinata.cloud/ipfs/bafkreihplwmmtmq6youvqcfpiks4mffrdzc54h5ymqhfiq63bzzjfdiugq" download="qris-ade.jpg" class="btn-qris-download">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download QRIS
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div class="modal-overlay" id="donation-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                    Support Me
+                </div>
+                <button type="button" class="modal-close" id="modal-close">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    If you enjoy this app, consider supporting its development. Every contribution helps keep it free and improving!
+                </p>
+                
+                <!-- Payment Platforms -->
+                <div class="donation-section">
+                    <h3 class="donation-section-title">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                        </svg>
+                        Payment Platforms
+                    </h3>
+                    <a href="https://trakteer.id/adsurkasur" target="_blank" rel="noopener noreferrer" class="donation-card">
+                        <div class="donation-card-content">
+                            <div class="donation-icon trakteer">
+                                <svg fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+                                </svg>
+                            </div>
+                            <div class="donation-info">
+                                <div class="donation-name">Trakteer</div>
+                                <div class="donation-label">trakteer.id/adsurkasur</div>
+                            </div>
+                        </div>
+                        <div class="donation-action">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </div>
+                    </a>
+                    <a href="https://ko-fi.com/adsurkasur" target="_blank" rel="noopener noreferrer" class="donation-card">
+                        <div class="donation-card-content">
+                            <div class="donation-icon kofi">
+                                <svg fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682.028-1.682.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.667-2.059 3.015z"/>
+                                </svg>
+                            </div>
+                            <div class="donation-info">
+                                <div class="donation-name">Ko-fi</div>
+                                <div class="donation-label">ko-fi.com/adsurkasur</div>
+                            </div>
+                        </div>
+                        <div class="donation-action">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </div>
+                    </a>
+                    <div class="donation-card" id="qris-card">
+                        <div class="donation-card-content">
+                            <div class="donation-icon qris">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                </svg>
+                            </div>
+                            <div class="donation-info">
+                                <div class="donation-name">QRIS</div>
+                                <div class="donation-label">Scan to pay with any Indonesian e-wallet</div>
+                            </div>
+                        </div>
+                        <div class="donation-action">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cryptocurrency -->
+                <div class="donation-section">
+                    <h3 class="donation-section-title">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13.425 6.432c1.983.19 3.538.778 3.71 2.528.117 1.276-.438 2.035-1.355 2.463 1.481.359 2.382 1.202 2.196 3.072-.227 2.343-2.035 2.952-4.62 3.08l.004 2.42-1.522.002-.004-2.42c-.166-.002-.34 0-.519.003-.238.003-.484.006-.731-.001l.004 2.42-1.52.001-.004-2.42-3.044-.058.256-1.768s1.15.024 1.129.012c.423-.002.549-.293.58-.485l-.008-3.878.012-2.76c-.046-.288-.248-.634-.87-.644.033-.03-1.115.001-1.115.001L6 6.38l3.12-.005-.004-2.37 1.571-.002.004 2.37c.304-.008.603-.005.906-.003l.3.002-.005-2.37L13.422 4l.003 2.432zm-2.92 4.46l.076.002c.926.04 3.67.155 3.673-1.457-.004-1.532-2.339-1.482-3.423-1.46-.129.003-.24.006-.327.005v2.91zm.129 4.75l-.134-.005v-2.91c.097.002.218 0 .359-.002 1.282-.015 4.145-.05 4.132 1.494.014 1.597-3.218 1.468-4.357 1.423z"/>
+                        </svg>
+                        Cryptocurrency
+                    </h3>
+                    <div class="donation-card" data-crypto="bitcoin" data-address="bc1q7d4t6ne3a44x2sujd5ektlngc9j0jfzhyn38z5">
+                        <div class="donation-card-content">
+                            <div class="donation-icon bitcoin">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.546z"/>
+                                    <path fill="#fff" d="M17.27 10.25c.24-1.594-.976-2.452-2.638-3.023l.54-2.163-1.317-.328-.525 2.106c-.346-.087-.702-.168-1.056-.249l.53-2.12-1.317-.328-.54 2.163c-.286-.065-.567-.13-.84-.198l.001-.006-1.816-.454-.35 1.407s.976.224.955.237c.533.133.63.486.614.766l-.615 2.465c.037.01.084.024.137.046l-.14-.034-.862 3.452c-.065.162-.23.405-.603.313.013.02-.956-.239-.956-.239l-.652 1.509 1.714.427c.319.08.631.163.94.242l-.546 2.19 1.316.328.54-2.165c.36.098.71.188 1.05.273l-.538 2.156 1.317.328.545-2.186c2.244.425 3.932.253 4.64-1.776.571-1.634-.028-2.576-1.208-3.192.86-.198 1.506-.764 1.678-1.932zm-3.005 4.213c-.406 1.63-3.15.749-4.04.528l.72-2.893c.89.222 3.746.662 3.32 2.365zm.405-4.237c-.37 1.48-2.654.728-3.395.544l.654-2.622c.74.184 3.128.528 2.741 2.078z"/>
+                                </svg>
+                            </div>
+                            <div class="donation-info">
+                                <div class="donation-name">Bitcoin<span class="copy-badge" style="display:none;">Copied!</span></div>
+                                <div class="donation-address">bc1q7d4t6ne3a44x2sujd5ektlngc9j0jfzhyn38z5</div>
+                            </div>
+                        </div>
+                        <div class="donation-action">
+                            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <svg class="check-icon" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="donation-card" data-crypto="evm" data-address="0xc53F031fe8cE7970D6Ff00fE65ef80617a893B44">
+                        <div class="donation-card-content">
+                            <div class="donation-icon ethereum">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z"/>
+                                </svg>
+                            </div>
+                            <div class="donation-info">
+                                <div class="donation-name">EVM (ETH/BNB/etc)<span class="copy-badge" style="display:none;">Copied!</span></div>
+                                <div class="donation-address">0xc53F031fe8cE7970D6Ff00fE65ef80617a893B44</div>
+                            </div>
+                        </div>
+                        <div class="donation-action">
+                            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <svg class="check-icon" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="donation-card" data-crypto="solana" data-address="3ymZGds5iphv4UNdSzv8DWaHeKGsCTe89sZwZMms2u9z">
+                        <div class="donation-card-content">
+                            <div class="donation-icon solana">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 397.7 311.7" width="24" height="24">
+                                    <defs>
+                                        <linearGradient id="solana-grad" x1="360.8791" y1="351.4553" x2="141.213" y2="-69.2936" gradientTransform="matrix(1 0 0 -1 0 314)">
+                                            <stop offset="0" stopColor="#00FFA3"/>
+                                            <stop offset="1" stopColor="#DC1FFF"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path fill="url(#solana-grad)" d="M64.6,237.9c2.4-2.4,5.7-3.8,9.2-3.8h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,237.9z"/>
+                                    <path fill="url(#solana-grad)" d="M64.6,3.8C67.1,1.4,70.4,0,73.8,0h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,3.8z"/>
+                                    <path fill="url(#solana-grad)" d="M333.1,120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8,0-8.7,7-4.6,11.1l62.7,62.7c2.4,2.4,5.7,3.8,9.2,3.8h317.4c5.8,0,8.7-7,4.6-11.1L333.1,120.1z"/>
+                                </svg>
+                            </div>
+                            <div class="donation-info">
+                                <div class="donation-name">Solana<span class="copy-badge" style="display:none;">Copied!</span></div>
+                                <div class="donation-address">3ymZGds5iphv4UNdSzv8DWaHeKGsCTe89sZwZMms2u9z</div>
+                            </div>
+                        </div>
+                        <div class="donation-action">
+                            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <svg class="check-icon" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="donation-card" data-crypto="sui" data-address="0x232363195ab483e8721f995cc9dbfbf7573ac471a86e51c9a71538f82c86f5f6">
+                        <div class="donation-card-content">
+                            <div class="donation-icon sui">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 383.5" width="24" height="24">
+                                    <path fill="#4DA2FF" fillRule="evenodd" clipRule="evenodd" d="M240.1,159.9c15.6,19.6,25,44.5,25,71.5s-9.6,52.6-25.7,72.4l-1.4,1.7l-0.4-2.2c-0.3-1.8-0.7-3.7-1.1-5.6c-8-35.3-34.2-65.6-77.4-90.2c-29.1-16.5-45.8-36.4-50.2-59c-2.8-14.6-0.7-29.3,3.3-41.9c4.1-12.6,10.1-23.1,15.2-29.4l16.8-20.5c2.9-3.6,8.5-3.6,11.4,0L240.1,159.9L240.1,159.9z M266.6,139.4L154.2,2c-2.1-2.6-6.2-2.6-8.3,0L33.4,139.4l-0.4,0.5C12.4,165.6,0,198.2,0,233.7c0,82.7,67.2,149.8,150,149.8c82.8,0,150-67.1,150-149.8c0-35.5-12.4-68.1-33.1-93.8L266.6,139.4L266.6,139.4z M60.3,159.5l10-12.3l0.3,2.3c0.2,1.8,0.5,3.6,0.9,5.4c6.5,34.1,29.8,62.6,68.6,84.6c33.8,19.2,53.4,41.3,59.1,65.6c2.4,10.1,2.8,20.1,1.8,28.8l-0.1,0.5l-0.5,0.2c-15.2,7.4-32.4,11.6-50.5,11.6c-63.5,0-115-51.4-115-114.8C34.9,204.2,44.4,179.1,60.3,159.5L60.3,159.5z"/>
+                                </svg>
+                            </div>
+                            <div class="donation-info">
+                                <div class="donation-name">Sui<span class="copy-badge" style="display:none;">Copied!</span></div>
+                                <div class="donation-address">0x232363195ab483e8721f995cc9dbfbf7573ac471a86e51c9a71538f82c86f5f6</div>
+                            </div>
+                        </div>
+                        <div class="donation-action">
+                            <svg class="copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <svg class="check-icon" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-thank-you">
+                    Thank you for considering supporting this project! 🙏
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     initFileUpload();
     initFormSubmission();
+    initDonationModal();
     clearQRResult();
 });
 
@@ -221,4 +222,121 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Donation Modal
+function initDonationModal() {
+    const modal = document.getElementById('donation-modal');
+    const openBtn = document.getElementById('donate-btn');
+    const closeBtn = document.getElementById('modal-close');
+    
+    // QRIS Modal
+    const qrisModal = document.getElementById('qris-modal');
+    const qrisCard = document.getElementById('qris-card');
+    const qrisCloseBtn = document.getElementById('qris-modal-close');
+    
+    if (!modal || !openBtn) return;
+    
+    // Open donation modal
+    openBtn.addEventListener('click', () => {
+        modal.classList.add('visible');
+        document.body.style.overflow = 'hidden';
+    });
+    
+    // Close donation modal
+    function closeModal() {
+        modal.classList.remove('visible');
+        document.body.style.overflow = '';
+    }
+    
+    closeBtn.addEventListener('click', closeModal);
+    
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // QRIS Modal handlers
+    if (qrisCard && qrisModal) {
+        qrisCard.addEventListener('click', () => {
+            qrisModal.classList.add('visible');
+        });
+        
+        function closeQrisModal() {
+            qrisModal.classList.remove('visible');
+        }
+        
+        qrisCloseBtn.addEventListener('click', closeQrisModal);
+        
+        qrisModal.addEventListener('click', (e) => {
+            if (e.target === qrisModal) {
+                closeQrisModal();
+            }
+        });
+    }
+    
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (qrisModal && qrisModal.classList.contains('visible')) {
+                qrisModal.classList.remove('visible');
+            } else if (modal.classList.contains('visible')) {
+                closeModal();
+            }
+        }
+    });
+    
+    // Copy crypto addresses
+    const cryptoCards = document.querySelectorAll('.donation-card[data-crypto]');
+    cryptoCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const address = card.dataset.address;
+            if (address) {
+                copyCryptoAddress(card, address);
+            }
+        });
+    });
+}
+
+// Copy crypto address with visual feedback
+async function copyCryptoAddress(card, address) {
+    const copyIcon = card.querySelector('.copy-icon');
+    const checkIcon = card.querySelector('.check-icon');
+    const badge = card.querySelector('.copy-badge');
+    
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(address);
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = address;
+            ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            const success = document.execCommand('copy');
+            document.body.removeChild(ta);
+            if (!success) throw new Error('Copy command failed');
+        }
+        
+        // Show success feedback
+        if (copyIcon) copyIcon.style.display = 'none';
+        if (checkIcon) {
+            checkIcon.style.display = 'block';
+            checkIcon.style.color = 'var(--color-success)';
+        }
+        if (badge) badge.style.display = 'inline-flex';
+        
+        // Reset after delay
+        setTimeout(() => {
+            if (copyIcon) copyIcon.style.display = 'block';
+            if (checkIcon) checkIcon.style.display = 'none';
+            if (badge) badge.style.display = 'none';
+        }, 3000);
+        
+    } catch (err) {
+        console.error('Failed to copy address:', err);
+    }
 }
