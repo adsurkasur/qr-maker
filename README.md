@@ -23,7 +23,30 @@ A beautiful web application that generates custom QR codes with logo overlay usi
 - ⚡ AJAX-powered for instant results
 - 📱 Mobile-friendly design
 
-## 🚀 Live Demo
+## � Project Structure
+
+```
+qr-maker/
+├── app.py                 # Flask application (backend)
+├── requirements.txt       # Python dependencies
+├── Dockerfile            # Container configuration for HF Spaces
+├── README.md             # This file
+├── DEPLOYMENT.md         # Deployment guide
+├── run.bat               # Windows startup script
+├── start.sh              # Linux/Docker startup script
+├── templates/
+│   └── index.html        # HTML template (uses Jinja2)
+└── static/
+    ├── favicon.ico       # Site favicon
+    ├── css/
+    │   ├── base.css      # Reset, CSS variables, typography
+    │   ├── components.css # UI components (forms, buttons, cards)
+    │   └── layout.css    # Layout, animations, responsive design
+    └── js/
+        └── app.js        # Client-side JavaScript (AJAX, file upload)
+```
+
+## �🚀 Live Demo
 
 This app can be deployed instantly on [Hugging Face Spaces](https://huggingface.co/spaces) for free!
 

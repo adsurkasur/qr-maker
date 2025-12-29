@@ -1,0 +1,264 @@
+﻿/* ========================================
+   COMPONENTS - Buttons, Forms, Cards, Messages
+   ======================================== */
+
+/* Form Groups */
+.form-section {
+    margin-bottom: var(--space-4xl);
+}
+
+.form-group {
+    margin-bottom: var(--space-2xl);
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--color-gray-700);
+    margin-bottom: var(--space-sm);
+    font-size: 1rem;
+}
+
+/* Input Wrapper with Icon */
+.input-wrapper {
+    position: relative;
+    transition: transform var(--transition-fast);
+}
+
+.input-wrapper svg {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-gray-400);
+    width: 20px;
+    height: 20px;
+}
+
+/* Text Input */
+input[type="text"] {
+    width: 100%;
+    padding: var(--space-lg) var(--space-lg) var(--space-lg) 50px;
+    border: 2px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-family: inherit;
+    transition: all var(--transition-fast);
+    background: var(--color-gray-50);
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-white);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+input[type="text"]::placeholder {
+    color: var(--color-gray-400);
+}
+
+/* File Input Container */
+.file-input-container {
+    border: 2px dashed var(--color-gray-300);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    text-align: center;
+    background: var(--color-gray-50);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.file-input-container:hover {
+    border-color: var(--color-primary);
+    background: var(--color-gray-100);
+}
+
+.file-input-container.dragover {
+    border-color: var(--color-primary);
+    background: #eef2ff;
+}
+
+.file-input-container label {
+    font-weight: 500;
+    color: var(--color-gray-700);
+    cursor: pointer;
+}
+
+.file-input-container .file-info {
+    font-size: 14px;
+    color: var(--color-gray-500);
+    margin-top: var(--space-sm);
+}
+
+.file-input-container .upload-icon {
+    margin: 0 auto var(--space-md);
+    display: block;
+    color: var(--color-gray-400);
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* File Name Display */
+.file-name {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    display: none;
+}
+
+/* Primary Button (Generate) */
+.btn-primary {
+    background: var(--gradient-primary);
+    color: var(--color-white);
+    padding: var(--space-lg) var(--space-3xl);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Download/Action Buttons */
+.btn-action {
+    background: var(--gradient-primary);
+    color: var(--color-white);
+    padding: var(--space-md) var(--space-2xl);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: var(--radius-full);
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: var(--space-sm);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Message Components */
+.message {
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    font-weight: 500;
+}
+
+.message-success {
+    background: var(--gradient-success);
+    color: var(--color-white);
+    margin-bottom: var(--space-2xl);
+}
+
+.message-error {
+    background: var(--gradient-error);
+    color: var(--color-white);
+    margin-top: var(--space-xl);
+}
+
+/* QR Display Card */
+.qr-display {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-3xl);
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.qr-code {
+    max-width: 300px;
+    height: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: var(--space-xl);
+}
+
+/* QR Info Box */
+.qr-info {
+    background: #f8fafc;
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--color-primary);
+    margin-bottom: var(--space-xl);
+    text-align: left;
+}
+
+.qr-info strong {
+    color: var(--color-gray-800);
+}
+
+.qr-info .text-content {
+    font-family: 'Monaco', 'Menlo', monospace;
+    background: var(--color-gray-200);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    margin-top: var(--space-sm);
+    word-break: break-all;
+    font-size: 14px;
+}
+
+/* Download Section */
+.download-section {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
