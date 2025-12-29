@@ -77,44 +77,42 @@
     font-weight: 400;
 }
 
-/* Main Content - Single column by default, two columns when QR generated */
+/* Main Content - Flexbox layout for smooth animation */
 .main-content {
     padding: var(--space-8);
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-wrap: nowrap;
     gap: var(--space-8);
-    align-items: start;
-    transition: grid-template-columns var(--duration-slow) var(--ease-out);
-}
-
-.main-content.has-qr {
-    grid-template-columns: 1fr 1fr;
+    align-items: flex-start;
 }
 
 /* Form Section */
 .form-section {
+    flex: 1 1 100%;
+    min-width: 0;
     margin-bottom: 0;
-    transition: all var(--duration-slow) var(--ease-out);
 }
 
 /* Result Section */
 .result-section {
     display: none;
-    animation: resultIn 0.4s var(--ease-out);
 }
 
 .result-section.visible {
     display: block;
+    flex: 1 1 50%;
+    min-width: 0;
+    animation: slideIn 0.4s var(--ease-out) forwards;
 }
 
-@keyframes resultIn {
+@keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(16px);
+        transform: translateX(30px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
 }
 
@@ -186,12 +184,19 @@
 /* Tablet and below - single column */
 @media (max-width: 768px) {
     .main-content {
-        grid-template-columns: 1fr;
-        gap: var(--space-6);
+        flex-wrap: wrap;
     }
 
-    .main-content.has-qr {
-        grid-template-columns: 1fr;
+    .form-section {
+        flex: 1 1 100%;
+    }
+
+    .result-section.visible {
+        flex: 1 1 100%;
+    }
+
+    .main-content {
+        gap: var(--space-6);
     }
 }
 

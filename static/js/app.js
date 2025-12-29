@@ -105,10 +105,7 @@ function displayQRCode(data) {
     const result = document.getElementById('qr-result');
     const escaped = escapeHtml(data.text);
     
-    // Add class to trigger layout animation
-    mainContent.classList.add('has-qr');
-    result.classList.add('visible');
-    
+    // Set content
     result.innerHTML = `
         <div class="qr-display">
             <img src="/qr?id=${data.qr_id}&t=${Date.now()}" alt="QR Code" class="qr-code">
@@ -135,9 +132,18 @@ function displayQRCode(data) {
     
     document.getElementById('copy-btn').addEventListener('click', () => copyToClipboard(data.text));
     
+    // Show result section
+    mainContent.classList.add('has-qr');
+    result.classList.add('visible');
+    
     // Scroll to QR code on mobile
     if (window.innerWidth <= 768) {
-        result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => {
+            const qrDisplay = result.querySelector('.qr-display');
+            if (qrDisplay) {
+                qrDisplay.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }
+        }, 450);
     }
 }
 
