@@ -485,7 +485,7 @@ input[type="file"] {
 .donation-section-title svg {
     width: 18px;
     height: 18px;
-    color: var(--color-gray-500);
+    color: inherit;
 }
 
 /* Donation Card */

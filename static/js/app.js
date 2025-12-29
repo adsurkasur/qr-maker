@@ -275,6 +275,40 @@ function initDonationModal() {
                 closeQrisModal();
             }
         });
+        
+        // QRIS Download handler
+        const qrisDownloadBtn = document.getElementById('qris-download-btn');
+        if (qrisDownloadBtn) {
+            qrisDownloadBtn.addEventListener('click', async () => {
+                const imageUrl = 'https://purple-given-lark-169.mypinata.cloud/ipfs/bafkreihplwmmtmq6youvqcfpiks4mffrdzc54h5ymqhfiq63bzzjfdiugq';
+                const originalText = qrisDownloadBtn.innerHTML;
+                
+                try {
+                    qrisDownloadBtn.innerHTML = '<span class="loading-spinner"></span>Downloading...';
+                    qrisDownloadBtn.disabled = true;
+                    
+                    const response = await fetch(imageUrl);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'qris-ade.jpg';
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    qrisDownloadBtn.innerHTML = originalText;
+                    qrisDownloadBtn.disabled = false;
+                } catch (error) {
+                    console.error('Download failed:', error);
+                    qrisDownloadBtn.innerHTML = originalText;
+                    qrisDownloadBtn.disabled = false;
+                }
+            });
+        }
     }
     
     // Close on Escape key

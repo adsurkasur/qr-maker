@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -118,12 +119,12 @@
             </div>
             <div class="modal-body qris-modal-body">
                 <img src="https://purple-given-lark-169.mypinata.cloud/ipfs/bafkreihplwmmtmq6youvqcfpiks4mffrdzc54h5ymqhfiq63bzzjfdiugq" alt="QRIS Payment" class="qris-image">
-                <a href="https://purple-given-lark-169.mypinata.cloud/ipfs/bafkreihplwmmtmq6youvqcfpiks4mffrdzc54h5ymqhfiq63bzzjfdiugq" download="qris-ade.jpg" class="btn-qris-download">
+                <button type="button" class="btn-qris-download" id="qris-download-btn">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                     </svg>
                     Download QRIS
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -152,9 +153,7 @@
                 <!-- Payment Platforms -->
                 <div class="donation-section">
                     <h3 class="donation-section-title">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
+                        <i class="fas fa-donate"></i>
                         Payment Platforms
                     </h3>
                     <a href="https://trakteer.id/adsurkasur" target="_blank" rel="noopener noreferrer" class="donation-card">
@@ -216,9 +215,7 @@
                 <!-- Cryptocurrency -->
                 <div class="donation-section">
                     <h3 class="donation-section-title">
-                        <svg fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M13.425 6.432c1.983.19 3.538.778 3.71 2.528.117 1.276-.438 2.035-1.355 2.463 1.481.359 2.382 1.202 2.196 3.072-.227 2.343-2.035 2.952-4.62 3.08l.004 2.42-1.522.002-.004-2.42c-.166-.002-.34 0-.519.003-.238.003-.484.006-.731-.001l.004 2.42-1.52.001-.004-2.42-3.044-.058.256-1.768s1.15.024 1.129.012c.423-.002.549-.293.58-.485l-.008-3.878.012-2.76c-.046-.288-.248-.634-.87-.644.033-.03-1.115.001-1.115.001L6 6.38l3.12-.005-.004-2.37 1.571-.002.004 2.37c.304-.008.603-.005.906-.003l.3.002-.005-2.37L13.422 4l.003 2.432zm-2.92 4.46l.076.002c.926.04 3.67.155 3.673-1.457-.004-1.532-2.339-1.482-3.423-1.46-.129.003-.24.006-.327.005v2.91zm.129 4.75l-.134-.005v-2.91c.097.002.218 0 .359-.002 1.282-.015 4.145-.05 4.132 1.494.014 1.597-3.218 1.468-4.357 1.423z"/>
-                        </svg>
+                        <span style="font-size: 18px; font-weight: 600;">₿</span>
                         Cryptocurrency
                     </h3>
                     <div class="donation-card" data-crypto="bitcoin" data-address="bc1q7d4t6ne3a44x2sujd5ektlngc9j0jfzhyn38z5">
@@ -269,14 +266,22 @@
                             <div class="donation-icon solana">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 397.7 311.7" width="24" height="24">
                                     <defs>
-                                        <linearGradient id="solana-grad" x1="360.8791" y1="351.4553" x2="141.213" y2="-69.2936" gradientTransform="matrix(1 0 0 -1 0 314)">
-                                            <stop offset="0" stopColor="#00FFA3"/>
-                                            <stop offset="1" stopColor="#DC1FFF"/>
+                                        <linearGradient id="solana-grad-1" gradientUnits="userSpaceOnUse" x1="360.8791" y1="351.4553" x2="141.213" y2="-69.2936" gradientTransform="matrix(1 0 0 -1 0 314)">
+                                            <stop offset="0" stop-color="#00FFA3"/>
+                                            <stop offset="1" stop-color="#DC1FFF"/>
+                                        </linearGradient>
+                                        <linearGradient id="solana-grad-2" gradientUnits="userSpaceOnUse" x1="264.8291" y1="401.6014" x2="45.163" y2="-19.1475" gradientTransform="matrix(1 0 0 -1 0 314)">
+                                            <stop offset="0" stop-color="#00FFA3"/>
+                                            <stop offset="1" stop-color="#DC1FFF"/>
+                                        </linearGradient>
+                                        <linearGradient id="solana-grad-3" gradientUnits="userSpaceOnUse" x1="312.5484" y1="376.688" x2="92.8822" y2="-44.061" gradientTransform="matrix(1 0 0 -1 0 314)">
+                                            <stop offset="0" stop-color="#00FFA3"/>
+                                            <stop offset="1" stop-color="#DC1FFF"/>
                                         </linearGradient>
                                     </defs>
-                                    <path fill="url(#solana-grad)" d="M64.6,237.9c2.4-2.4,5.7-3.8,9.2-3.8h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,237.9z"/>
-                                    <path fill="url(#solana-grad)" d="M64.6,3.8C67.1,1.4,70.4,0,73.8,0h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,3.8z"/>
-                                    <path fill="url(#solana-grad)" d="M333.1,120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8,0-8.7,7-4.6,11.1l62.7,62.7c2.4,2.4,5.7,3.8,9.2,3.8h317.4c5.8,0,8.7-7,4.6-11.1L333.1,120.1z"/>
+                                    <path fill="url(#solana-grad-1)" d="M64.6,237.9c2.4-2.4,5.7-3.8,9.2-3.8h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,237.9z"/>
+                                    <path fill="url(#solana-grad-2)" d="M64.6,3.8C67.1,1.4,70.4,0,73.8,0h317.4c5.8,0,8.7,7,4.6,11.1l-62.7,62.7c-2.4,2.4-5.7,3.8-9.2,3.8H6.5c-5.8,0-8.7-7-4.6-11.1L64.6,3.8z"/>
+                                    <path fill="url(#solana-grad-3)" d="M333.1,120.1c-2.4-2.4-5.7-3.8-9.2-3.8H6.5c-5.8,0-8.7,7-4.6,11.1l62.7,62.7c2.4,2.4,5.7,3.8,9.2,3.8h317.4c5.8,0,8.7-7,4.6-11.1L333.1,120.1z"/>
                                 </svg>
                             </div>
                             <div class="donation-info">
