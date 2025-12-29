@@ -3,6 +3,15 @@ FROM python:3.9-slim
 # Set working directory
 WORKDIR /app
 
+# Install system dependencies for cairo and build tools
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libcairo2-dev \
+    pkg-config \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy requirements first for better caching
 COPY requirements.txt .
 

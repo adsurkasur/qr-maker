@@ -157,19 +157,22 @@ async function copyToClipboard(text) {
         } else {
             const ta = document.createElement('textarea');
             ta.value = text;
-            ta.style.cssText = 'position:fixed;left:-9999px';
+            ta.style.cssText = 'position:fixed;left:-9999px;top:0';
             document.body.appendChild(ta);
+            ta.focus();
             ta.select();
-            document.execCommand('copy');
+            const success = document.execCommand('copy');
             document.body.removeChild(ta);
+            if (!success) throw new Error('Copy command failed');
         }
         
         btn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Copied`;
         btn.style.background = 'var(--color-success)';
         btn.style.color = 'white';
         btn.style.border = 'none';
-    } catch {
-        btn.innerHTML = 'Failed';
+    } catch (err) {
+        console.error('Copy failed:', err);
+        btn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Failed`;
         btn.style.background = 'var(--color-error)';
         btn.style.color = 'white';
         btn.style.border = 'none';
