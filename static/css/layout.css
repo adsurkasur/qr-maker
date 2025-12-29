@@ -93,6 +93,10 @@
     margin-bottom: 0;
 }
 
+.main-content.has-qr .form-section {
+    flex: 1 1 50%;
+}
+
 /* Result Section */
 .result-section {
     display: none;

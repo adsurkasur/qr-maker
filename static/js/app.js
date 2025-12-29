@@ -136,14 +136,21 @@ function displayQRCode(data) {
     mainContent.classList.add('has-qr');
     result.classList.add('visible');
     
-    // Scroll to QR code on mobile
+    // Scroll to QR code on mobile - wait for image to load
     if (window.innerWidth <= 768) {
-        setTimeout(() => {
-            const qrDisplay = result.querySelector('.qr-display');
-            if (qrDisplay) {
-                qrDisplay.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        const qrImage = result.querySelector('.qr-code');
+        if (qrImage) {
+            const performScroll = () => {
+                // Scroll to the bottom of the result section in one smooth motion
+                result.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            };
+            
+            qrImage.onload = performScroll;
+            // Fallback if image is cached
+            if (qrImage.complete) {
+                performScroll();
             }
-        }, 450);
+        }
     }
 }
 
