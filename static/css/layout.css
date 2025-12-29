@@ -4,7 +4,8 @@
 
 /* Main Container */
 .container {
-    max-width: 560px;
+    width: 100%;
+    max-width: 900px;
     margin: 0 auto;
     background: var(--color-white);
     border-radius: var(--radius-xl);
@@ -28,7 +29,7 @@
 .header {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
     color: var(--color-white);
-    padding: var(--space-10) var(--space-8);
+    padding: var(--space-8) var(--space-8);
     text-align: center;
     position: relative;
 }
@@ -76,15 +77,34 @@
     font-weight: 400;
 }
 
-/* Main Content */
+/* Main Content - Single column by default, two columns when QR generated */
 .main-content {
     padding: var(--space-8);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    align-items: start;
+    transition: grid-template-columns var(--duration-slow) var(--ease-out);
+}
+
+.main-content.has-qr {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* Form Section */
+.form-section {
+    margin-bottom: 0;
+    transition: all var(--duration-slow) var(--ease-out);
 }
 
 /* Result Section */
 .result-section {
     display: none;
     animation: resultIn 0.4s var(--ease-out);
+}
+
+.result-section.visible {
+    display: block;
 }
 
 @keyframes resultIn {
@@ -163,6 +183,18 @@
    RESPONSIVE DESIGN
    ======================================== */
 
+/* Tablet and below - single column */
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+
+    .main-content.has-qr {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 640px) {
     body {
         padding: var(--space-4);
@@ -173,7 +205,7 @@
     }
 
     .header {
-        padding: var(--space-8) var(--space-6);
+        padding: var(--space-6) var(--space-6);
     }
 
     .header h1 {
@@ -203,11 +235,11 @@
     }
 
     .header {
-        padding: var(--space-6) var(--space-5);
+        padding: var(--space-5) var(--space-4);
     }
 
     .main-content {
-        padding: var(--space-5);
+        padding: var(--space-4);
     }
 
     .file-input-container {

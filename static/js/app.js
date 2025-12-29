@@ -101,13 +101,15 @@ function initFormSubmission() {
 
 // QR Code Display
 function displayQRCode(data) {
+    const mainContent = document.querySelector('.main-content');
     const result = document.getElementById('qr-result');
     const escaped = escapeHtml(data.text);
     
+    // Add class to trigger layout animation
+    mainContent.classList.add('has-qr');
+    result.classList.add('visible');
+    
     result.innerHTML = `
-        <div class="message message-success">
-            QR Code generated successfully
-        </div>
         <div class="qr-display">
             <img src="/qr?id=${data.qr_id}&t=${Date.now()}" alt="QR Code" class="qr-code">
             <div class="qr-info">
@@ -131,18 +133,23 @@ function displayQRCode(data) {
         </div>
     `;
     
-    result.style.display = 'block';
-    
     document.getElementById('copy-btn').addEventListener('click', () => copyToClipboard(data.text));
     
-    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // Scroll to QR code on mobile
+    if (window.innerWidth <= 768) {
+        result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function clearQRResult() {
+    const mainContent = document.querySelector('.main-content');
     const el = document.getElementById('qr-result');
+    if (mainContent) {
+        mainContent.classList.remove('has-qr');
+    }
     if (el) {
+        el.classList.remove('visible');
         el.innerHTML = '';
-        el.style.display = 'none';
     }
 }
 
