@@ -1,5 +1,6 @@
 ﻿from flask import Flask, render_template, request, send_file, session, make_response, redirect
 from io import BytesIO
+import io
 import qrcode
 from PIL import Image
 import os
@@ -8,8 +9,29 @@ import uuid
 import time
 import base64
 
+# SVG support - try to import svg libraries (works in Docker/Linux, may fail on Windows)
+SVG_SUPPORT = False
+svg_converter = None
+try:
+    import cairosvg
+    SVG_SUPPORT = True
+    svg_converter = 'cairosvg'
+except (ImportError, OSError):
+    try:
+        from svglib.svglib import svg2rlg
+        from reportlab.graphics import renderPM
+        SVG_SUPPORT = True
+        svg_converter = 'svglib'
+    except (ImportError, OSError):
+        pass
+
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-change-this-in-production'
+
+# Supported image formats for logo (SVG only if library available)
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+if SVG_SUPPORT:
+    ALLOWED_EXTENSIONS.add('svg')
 
 # In-memory storage for QR codes (better for containerized environments)
 qr_storage = {}
@@ -96,15 +118,43 @@ def index():
         logo_file = request.files.get('logo')
         if logo_file and logo_file.filename:
             # Validate file type
-            if not logo_file.filename.lower().endswith('.png'):
+            file_ext = logo_file.filename.lower().rsplit('.', 1)[-1] if '.' in logo_file.filename else ''
+            if file_ext not in ALLOWED_EXTENSIONS:
+                allowed_list = ', '.join(sorted(ALLOWED_EXTENSIONS)).upper()
                 if is_ajax:
-                    return {'success': False, 'error': 'Only PNG files are allowed for logos.'}
-                session['error'] = 'Only PNG files are allowed for logos.'
+                    return {'success': False, 'error': f'Unsupported file format. Allowed: {allowed_list}'}
+                session['error'] = f'Unsupported file format. Allowed: {allowed_list}'
                 return render_template('index.html', error=session['error'])
             
             try:
-                # Open and process logo
-                logo_img = Image.open(logo_file)
+                # Handle SVG files - convert to PNG first
+                if file_ext == 'svg':
+                    svg_data = logo_file.read()
+                    if svg_converter == 'cairosvg':
+                        import cairosvg
+                        png_data = cairosvg.svg2png(bytestring=svg_data)
+                        logo_img = Image.open(io.BytesIO(png_data))
+                    elif svg_converter == 'svglib':
+                        from svglib.svglib import svg2rlg
+                        from reportlab.graphics import renderPM
+                        # Write SVG to temp file for svglib
+                        with tempfile.NamedTemporaryFile(suffix='.svg', delete=False) as tmp:
+                            tmp.write(svg_data)
+                            tmp_path = tmp.name
+                        try:
+                            drawing = svg2rlg(tmp_path)
+                            if drawing:
+                                png_data = renderPM.drawToString(drawing, fmt='PNG')
+                                logo_img = Image.open(io.BytesIO(png_data))
+                            else:
+                                raise ValueError("Could not parse SVG file")
+                        finally:
+                            os.unlink(tmp_path)
+                    else:
+                        raise ValueError("SVG support not available")
+                else:
+                    # Open and process logo
+                    logo_img = Image.open(logo_file)
                 
                 # Convert to RGBA if not already
                 if logo_img.mode != 'RGBA':

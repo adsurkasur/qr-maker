@@ -1,281 +1,199 @@
 ﻿/**
- * QR Code Generator - Main Application Script
- * Handles form submission, file uploads, and QR code display
+ * QR Code Generator - Modern UI Script
  */
 
-// ========================================
-// INITIALIZATION
-// ========================================
-
 document.addEventListener('DOMContentLoaded', function() {
-    // Clear browser storage on load
     localStorage.clear();
     sessionStorage.clear();
     
-    // Initialize components
     initFileUpload();
     initFormSubmission();
-    initInputEffects();
-    
-    // Clear any QR results on page load/refresh
     clearQRResult();
 });
 
-// Handle browser back/forward navigation
 window.addEventListener('pageshow', function(event) {
     if (event.persisted) {
         clearQRResult();
         document.getElementById('qr-form').reset();
-        document.getElementById('file-name').style.display = 'none';
+        hideFileName();
     }
 });
 
-// ========================================
-// FILE UPLOAD HANDLING
-// ========================================
-
+// File Upload
 function initFileUpload() {
     const fileInput = document.getElementById('logo');
-    const fileDropZone = document.getElementById('file-drop-zone');
-    const fileNameDisplay = document.getElementById('file-name');
+    const dropZone = document.getElementById('file-drop-zone');
+    const fileName = document.getElementById('file-name');
     
-    // Prevent default drag behaviors
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        fileDropZone.addEventListener(eventName, preventDefaults, false);
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+        dropZone.addEventListener(event, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
     });
     
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    
-    // Highlight drop zone on drag
-    ['dragenter', 'dragover'].forEach(eventName => {
-        fileDropZone.addEventListener(eventName, () => {
-            fileDropZone.classList.add('dragover');
-        }, false);
+    ['dragenter', 'dragover'].forEach(event => {
+        dropZone.addEventListener(event, () => dropZone.classList.add('dragover'));
     });
     
-    ['dragleave', 'drop'].forEach(eventName => {
-        fileDropZone.addEventListener(eventName, () => {
-            fileDropZone.classList.remove('dragover');
-        }, false);
+    ['dragleave', 'drop'].forEach(event => {
+        dropZone.addEventListener(event, () => dropZone.classList.remove('dragover'));
     });
     
-    // Handle file drop
-    fileDropZone.addEventListener('drop', function(e) {
+    dropZone.addEventListener('drop', e => {
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             fileInput.files = files;
-            updateFileName(files[0]);
-        }
-    }, false);
-    
-    // Handle file input change
-    fileInput.addEventListener('change', function() {
-        if (this.files.length > 0) {
-            updateFileName(this.files[0]);
-        } else {
-            fileNameDisplay.style.display = 'none';
+            showFileName(files[0].name);
         }
     });
     
-    function updateFileName(file) {
-        fileNameDisplay.textContent = '📎 ' + file.name;
-        fileNameDisplay.style.display = 'block';
-    }
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            showFileName(this.files[0].name);
+        } else {
+            hideFileName();
+        }
+    });
 }
 
-// ========================================
-// FORM SUBMISSION
-// ========================================
+function showFileName(name) {
+    const el = document.getElementById('file-name');
+    el.textContent = name;
+    el.style.display = 'flex';
+}
 
+function hideFileName() {
+    document.getElementById('file-name').style.display = 'none';
+}
+
+// Form Submission
 function initFormSubmission() {
-    const form = document.getElementById('qr-form');
-    
-    form.addEventListener('submit', function(e) {
+    document.getElementById('qr-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
         const formData = new FormData(this);
-        const submitButton = document.getElementById('generate-btn');
-        const originalText = submitButton.innerHTML;
+        const btn = document.getElementById('generate-btn');
+        const originalText = btn.innerHTML;
         
-        // Show loading state
-        submitButton.innerHTML = '<span class="loading-spinner"></span>Generating...';
-        submitButton.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span>Generating...';
+        btn.disabled = true;
         
-        // Clear previous results
         clearQRResult();
-        removeExistingErrors();
+        removeErrors();
         
-        // Send AJAX request
-        fetch('/', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayQRCode(data);
-            } else {
-                showError(data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('An error occurred while generating the QR code.');
-        })
-        .finally(() => {
-            // Reset button state
-            submitButton.innerHTML = originalText;
-            submitButton.disabled = false;
-        });
+        fetch('/', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    displayQRCode(data);
+                } else {
+                    showError(data.error);
+                }
+            })
+            .catch(() => showError('An error occurred. Please try again.'))
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
     });
 }
 
-// ========================================
-// QR CODE DISPLAY
-// ========================================
-
+// QR Code Display
 function displayQRCode(data) {
-    const resultSection = document.getElementById('qr-result');
+    const result = document.getElementById('qr-result');
+    const escaped = escapeHtml(data.text);
     
-    // Escape special characters for use in onclick attribute
-    const escapedText = escapeHtml(data.text);
-    
-    const qrHtml = `
+    result.innerHTML = `
         <div class="message message-success">
-            ✨ QR Code generated successfully!
+            QR Code generated successfully
         </div>
         <div class="qr-display">
-            <img src="/qr?id=${data.qr_id}&t=${Date.now()}" alt="Generated QR Code" class="qr-code">
+            <img src="/qr?id=${data.qr_id}&t=${Date.now()}" alt="QR Code" class="qr-code">
             <div class="qr-info">
-                <strong>📝 Encoded Text:</strong>
-                <div class="text-content">${escapedText}</div>
+                <div class="qr-info-label">Encoded Content</div>
+                <div class="text-content">${escaped}</div>
             </div>
             <div class="download-section">
-                <a href="/qr?id=${data.qr_id}&download=1" download="qrcode.png" class="btn-action">
-                    📥 Download PNG
+                <a href="/qr?id=${data.qr_id}&download=1" download="qrcode.png" class="btn-action btn-download">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download
                 </a>
                 <button type="button" class="btn-action" id="copy-btn">
-                    📋 Copy Text
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    Copy Text
                 </button>
             </div>
         </div>
     `;
     
-    resultSection.innerHTML = qrHtml;
-    resultSection.style.display = 'block';
+    result.style.display = 'block';
     
-    // Add click handler for copy button
-    document.getElementById('copy-btn').addEventListener('click', function() {
-        copyToClipboard(data.text);
-    });
+    document.getElementById('copy-btn').addEventListener('click', () => copyToClipboard(data.text));
     
-    // Scroll to result
-    resultSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest'
-    });
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function clearQRResult() {
-    const resultSection = document.getElementById('qr-result');
-    if (resultSection) {
-        resultSection.innerHTML = '';
-        resultSection.style.display = 'none';
+    const el = document.getElementById('qr-result');
+    if (el) {
+        el.innerHTML = '';
+        el.style.display = 'none';
     }
 }
 
-// ========================================
-// CLIPBOARD FUNCTIONALITY
-// ========================================
-
+// Clipboard
 async function copyToClipboard(text) {
-    const copyBtn = document.getElementById('copy-btn');
-    const originalText = copyBtn.innerHTML;
+    const btn = document.getElementById('copy-btn');
+    const original = btn.innerHTML;
     
     try {
-        // Try modern clipboard API first
         if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(text);
         } else {
-            // Fallback for older browsers or non-HTTPS
-            fallbackCopyToClipboard(text);
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;left:-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
         }
         
-        // Show success feedback
-        copyBtn.innerHTML = '✅ Copied!';
-        copyBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-        
-    } catch (err) {
-        console.error('Failed to copy text:', err);
-        
-        // Show error feedback
-        copyBtn.innerHTML = '❌ Failed to copy';
-        copyBtn.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        btn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Copied`;
+        btn.style.background = 'var(--color-success)';
+        btn.style.color = 'white';
+        btn.style.border = 'none';
+    } catch {
+        btn.innerHTML = 'Failed';
+        btn.style.background = 'var(--color-error)';
+        btn.style.color = 'white';
+        btn.style.border = 'none';
     }
     
-    // Reset after 2 seconds
     setTimeout(() => {
-        copyBtn.innerHTML = originalText;
-        copyBtn.style.background = '';
+        btn.innerHTML = original;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.border = '';
     }, 2000);
 }
 
-function fallbackCopyToClipboard(text) {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    
-    try {
-        document.execCommand('copy');
-    } finally {
-        document.body.removeChild(textArea);
-    }
+// Errors
+function showError(msg) {
+    const html = `<div class="message message-error">${escapeHtml(msg)}</div>`;
+    document.querySelector('.main-content').insertAdjacentHTML('beforeend', html);
 }
 
-// ========================================
-// ERROR HANDLING
-// ========================================
-
-function showError(message) {
-    const errorHtml = '<div class="message message-error">' + escapeHtml(message) + '</div>';
-    document.querySelector('.main-content').insertAdjacentHTML('beforeend', errorHtml);
+function removeErrors() {
+    document.querySelectorAll('.message-error').forEach(el => el.remove());
 }
 
-function removeExistingErrors() {
-    const existingError = document.querySelector('.message-error');
-    if (existingError) {
-        existingError.remove();
-    }
-}
-
-// ========================================
-// INPUT EFFECTS
-// ========================================
-
-function initInputEffects() {
-    document.querySelectorAll('input[type="text"]').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'translateY(-2px)';
-        });
-        
-        input.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'translateY(0)';
-        });
-    });
-}
-
-// ========================================
-// UTILITY FUNCTIONS
-// ========================================
-
+// Utility
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
