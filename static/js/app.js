@@ -41,10 +41,28 @@ function initFileUpload() {
         dropZone.addEventListener(event, () => dropZone.classList.remove('dragover'));
     });
     
+    // enable click on the visible drop zone to open the hidden file input
+    dropZone.addEventListener('click', () => {
+        // delegate click to the actual input element
+        fileInput.click();
+    });
+
     dropZone.addEventListener('drop', e => {
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-            fileInput.files = files;
+            // assign the dropped files to the file input in a cross‑browser safe way
+            try {
+                const dt = new DataTransfer(); // modern browsers support this
+                for (let i = 0; i < files.length; i++) {
+                    dt.items.add(files[i]);
+                }
+                fileInput.files = dt.files;
+            } catch (err) {
+                // fallback: assignment may not be allowed in some browsers
+                console.warn('Unable to directly assign dropped files to input', err);
+                // we still keep the original files reference for display purposes
+            }
+
             showFileName(files[0].name);
         }
     });
@@ -70,33 +88,38 @@ function hideFileName() {
 
 // Form Submission
 function initFormSubmission() {
-    document.getElementById('qr-form').addEventListener('submit', function(e) {
+    const form = document.getElementById('qr-form');
+    const btn = document.getElementById('generate-btn');
+
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        const formData = new FormData(this);
-        const btn = document.getElementById('generate-btn');
         const originalText = btn.innerHTML;
-        
+
+        // show loading state immediately so the user knows something is happening
         btn.innerHTML = '<span class="loading-spinner"></span>Generating...';
         btn.disabled = true;
-        
-        clearQRResult();
-        removeErrors();
-        
-        fetch('/', { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    displayQRCode(data);
-                } else {
-                    showError(data.error);
-                }
-            })
-            .catch(() => showError('An error occurred. Please try again.'))
-            .finally(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
+
+        try {
+            clearQRResult();
+            removeErrors();
+
+            const formData = new FormData(this);
+            const res = await fetch('/', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                displayQRCode(data);
+            } else {
+                showError(data.error);
+            }
+        } catch (err) {
+            // network failure or unexpected error should still clear the button state
+            console.error('Submission error:', err);
+            showError('An error occurred. Please try again.');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
     });
 }
 
