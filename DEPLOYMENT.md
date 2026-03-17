@@ -1,49 +1,55 @@
-# Hugging Face Spaces Deployment Guide
+# Local Docker Deployment Guide
 
-## Quick Deploy Steps
+## Prerequisites
 
-1. **Create a Hugging Face Account**
-   - Go to [huggingface.co](https://huggingface.co) and sign up
+- Ubuntu Server machine (for example HP Thin Client T530)
+- Docker installed
+- Docker Compose installed (`docker compose` command available)
+- Git installed
 
-2. **Create a New Space**
-   - Click "New Space" on your profile
-   - Name: `qr-code-generator` (or your choice)
-   - License: MIT
-   - SDK: Docker
-   - Visibility: Public
+## Initial Setup
 
-3. **Upload Files**
-   - Upload all files from this project:
-     - `app.py`
-     - `requirements.txt`
-     - `Dockerfile`
-     - `README.md`
-     - `templates/` folder
-     - `.gitattributes`
+1. Clone the repository:
 
-4. **Deploy**
-   - Hugging Face will automatically build and deploy
-   - Your app will be live at: `https://[your-username]-qr-code-generator.hf.space`
+   ```bash
+   git clone <your-repo-url>
+   cd qr-maker
+   ```
 
-## Files Needed for Deployment
+2. Create your local environment file:
 
-- ✅ `app.py` - Flask application
-- ✅ `requirements.txt` - Python dependencies
-- ✅ `Dockerfile` - Container configuration
-- ✅ `README.md` - Space metadata
-- ✅ `templates/index.html` - HTML template
-- ✅ `.gitattributes` - File handling config
+   ```bash
+   cp .env.example .env
+   ```
 
-## Troubleshooting
+3. Edit `.env` and set real values for:
+- `QR_API_KEY`
+- `FLASK_SECRET_KEY`
+- `ALLOWED_ORIGINS`
+- `PORT` (keep as `7860` unless you intentionally change mapping)
 
-- **Port Issues**: App runs on port 7860 (Hugging Face standard)
-- **File Uploads**: Logo uploads work in containers
-- **Sessions**: Flask sessions work in Spaces
-- **Temp Files**: Uses container temp directory
+## Run the Service
 
-## Alternative Deployment Options
+Start in detached mode:
 
-- **Vercel**: Use `vercel.json` config
-- **Railway**: Direct GitHub integration
-- **Render**: Web service deployment
-- **Heroku**: Traditional PaaS deployment
+```bash
+docker compose up -d
+```
+
+## Check Logs
+
+```bash
+docker compose logs -f qr-api
+```
+
+## Update Deployment
+
+Use the provided script:
+
+```bash
+./deploy.sh
+```
+
+## Cloudflare Tunnel Note
+
+Cloudflare Tunnel configuration is separate and is not managed in this repository.

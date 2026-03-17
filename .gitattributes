@@ -1,4 +1,8 @@
-# Auto detect text files and perform LF normalization
+# Ensure shell scripts always use Unix line endings
+*.sh    text eol=lf
+
+# Everything else: auto
+*       text=auto# Auto detect text files and perform LF normalization
 * text=auto
 
 # Python files

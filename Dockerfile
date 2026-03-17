@@ -1,4 +1,7 @@
-FROM python:3.9-slim
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Set working directory
 WORKDIR /app
@@ -7,6 +10,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    curl \
     libcairo2-dev \
     pkg-config \
     python3-dev \
@@ -23,6 +27,11 @@ COPY . .
 
 # Make start.sh executable
 RUN chmod +x start.sh
+
+# Create non-root runtime user and set ownership
+RUN adduser --disabled-password --gecos "" appuser && chown -R appuser:appuser /app
+
+USER appuser
 
 # Expose the port the app runs on
 EXPOSE 7860

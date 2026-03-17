@@ -29,6 +29,9 @@ Thumbs.db
 # Logs
 *.log
 
+# Environment files
+.env
+
 # AI generated files
 ai-context.md
 
