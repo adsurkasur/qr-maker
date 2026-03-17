@@ -1,4 +1,4 @@
-﻿from flask import Flask, render_template, request, send_file, session, make_response, redirect
+﻿from flask import Flask, Blueprint, jsonify, render_template, request, send_file, session, make_response, redirect
 from io import BytesIO
 import io
 import qrcode
@@ -8,6 +8,15 @@ import tempfile
 import uuid
 import time
 import base64
+import json
+import zipfile
+from flask_cors import CORS
+
+# ENV VARS:
+# PORT             - server port (default: 5000 dev, 7860 prod)
+# QR_API_KEY       - API key for /api/* routes (optional, skipped if not set)
+# FLASK_SECRET_KEY - Flask session secret key
+# ALLOWED_ORIGINS  - comma-separated CORS origins (default: *)
 
 # SVG support - try to import svg libraries (works in Docker/Linux, may fail on Windows)
 SVG_SUPPORT = False
@@ -25,8 +34,28 @@ except (ImportError, OSError):
     except (ImportError, OSError):
         pass
 
+def _get_allowed_origins():
+    """Return allowed CORS origins from env or wildcard for development."""
+    configured = os.environ.get('ALLOWED_ORIGINS', '').strip()
+    if not configured:
+        return '*'
+
+    origins = [origin.strip() for origin in configured.split(',') if origin.strip()]
+    return origins if origins else '*'
+
+
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-this-in-production'
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
+CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": _get_allowed_origins(),
+            "methods": ["POST", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization", "X-API-Key"],
+        }
+    },
+)
 
 # Supported image formats for logo (SVG only if library available)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
@@ -35,6 +64,251 @@ if SVG_SUPPORT:
 
 # In-memory storage for QR codes (better for containerized environments)
 qr_storage = {}
+
+api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+
+def _decode_logo_base64(logo_base64):
+    """Decode and load a base64 logo string into a PIL Image in RGBA mode."""
+    if not isinstance(logo_base64, str) or not logo_base64.strip():
+        raise ValueError('logo_base64 must be a non-empty string when provided.')
+
+    content = logo_base64.strip()
+    mime_type = None
+
+    if content.startswith('data:') and ',' in content:
+        header, content = content.split(',', 1)
+        if ';base64' not in header.lower():
+            raise ValueError('logo_base64 data URL must include ;base64.')
+        mime_type = header[5:].split(';', 1)[0].lower()
+
+    try:
+        logo_bytes = base64.b64decode(content, validate=True)
+    except Exception:
+        raise ValueError('Invalid base64 image data in logo_base64.')
+
+    if not logo_bytes:
+        raise ValueError('Decoded logo image is empty.')
+
+    is_svg = False
+    if mime_type == 'image/svg+xml':
+        is_svg = True
+    else:
+        sniff = logo_bytes[:512].lstrip().lower()
+        if sniff.startswith(b'<?xml') or sniff.startswith(b'<svg') or b'<svg' in sniff:
+            is_svg = True
+
+    if is_svg:
+        if not SVG_SUPPORT:
+            raise ValueError('SVG logos are not supported in this environment.')
+
+        if svg_converter == 'cairosvg':
+            import cairosvg
+            png_data = cairosvg.svg2png(bytestring=logo_bytes)
+            logo_img = Image.open(io.BytesIO(png_data))
+        elif svg_converter == 'svglib':
+            from svglib.svglib import svg2rlg
+            from reportlab.graphics import renderPM
+            with tempfile.NamedTemporaryFile(suffix='.svg', delete=False) as tmp:
+                tmp.write(logo_bytes)
+                tmp_path = tmp.name
+            try:
+                drawing = svg2rlg(tmp_path)
+                if not drawing:
+                    raise ValueError('Could not parse SVG logo data.')
+                png_data = renderPM.drawToString(drawing, fmt='PNG')
+                logo_img = Image.open(io.BytesIO(png_data))
+            finally:
+                os.unlink(tmp_path)
+        else:
+            raise ValueError('SVG logos are not supported in this environment.')
+    else:
+        logo_img = Image.open(io.BytesIO(logo_bytes))
+
+    if logo_img.mode != 'RGBA':
+        logo_img = logo_img.convert('RGBA')
+
+    return logo_img
+
+
+def _generate_qr_png_bytes(text, logo_img=None):
+    """Generate PNG bytes for a QR code with an optional centered logo."""
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(text)
+    qr.make(fit=True)
+
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    qr_pil = qr_img.convert('RGBA')
+
+    if logo_img is not None:
+        qr_width, qr_height = qr_pil.size
+        logo_size = min(qr_width, qr_height) // 5
+
+        logo_copy = logo_img.copy()
+        logo_copy.thumbnail((logo_size, logo_size), Image.Resampling.LANCZOS)
+
+        if logo_copy.mode == 'RGBA':
+            background = Image.new('RGBA', logo_copy.size, (255, 255, 255, 255))
+            logo_copy = Image.alpha_composite(background, logo_copy)
+
+        logo_width, logo_height = logo_copy.size
+        x = (qr_width - logo_width) // 2
+        y = (qr_height - logo_height) // 2
+        qr_pil.paste(logo_copy, (x, y), logo_copy if logo_copy.mode == 'RGBA' else None)
+
+    final_img = qr_pil.convert('RGB')
+    img_buffer = BytesIO()
+    final_img.save(img_buffer, format='PNG')
+    return img_buffer.getvalue()
+
+
+def _get_bulk_item_id(item, index):
+    """Return item id or a stringified index fallback."""
+    if not isinstance(item, dict):
+        return str(index)
+
+    raw_id = item.get('id')
+    if raw_id is None:
+        return str(index)
+
+    item_id = str(raw_id).strip()
+    return item_id if item_id else str(index)
+
+
+@api_bp.before_request
+def _api_key_guard():
+    """Protect API routes when QR_API_KEY is configured."""
+    if request.method == 'OPTIONS':
+        return None
+
+    expected_api_key = os.environ.get('QR_API_KEY')
+    if not expected_api_key:
+        return None
+
+    provided_api_key = request.headers.get('X-API-Key', '')
+    if provided_api_key != expected_api_key:
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+
+    return None
+
+
+@api_bp.route('/qr/single', methods=['POST', 'OPTIONS'])
+def api_qr_single():
+    if request.method == 'OPTIONS':
+        return ('', 204)
+
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({'success': False, 'error': 'Request body must be valid JSON.'}), 400
+
+    text = str(payload.get('text', '')).strip()
+    logo_base64 = payload.get('logo_base64')
+
+    if not text:
+        return jsonify({'success': False, 'error': 'Please provide text.'}), 400
+
+    if len(text) > 1000:
+        return jsonify({'success': False, 'error': 'Text is too long. Maximum 1000 characters allowed.'}), 400
+
+    try:
+        logo_img = None
+        if logo_base64 is not None:
+            logo_img = _decode_logo_base64(logo_base64)
+
+        qr_png = _generate_qr_png_bytes(text, logo_img)
+        image_base64 = base64.b64encode(qr_png).decode('ascii')
+        return jsonify({'success': True, 'image_base64': image_base64, 'format': 'png'}), 200
+    except ValueError as exc:
+        return jsonify({'success': False, 'error': str(exc)}), 400
+    except Exception as exc:
+        return jsonify({'success': False, 'error': f'Error generating QR code: {str(exc)}'}), 500
+
+
+@api_bp.route('/qr/bulk', methods=['POST', 'OPTIONS'])
+def api_qr_bulk():
+    if request.method == 'OPTIONS':
+        return ('', 204)
+
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({'success': False, 'error': 'Request body must be valid JSON.'}), 400
+
+    items = payload.get('items')
+    if not isinstance(items, list) or not items:
+        return jsonify({'success': False, 'error': 'items is required and must be a non-empty array.'}), 400
+
+    if len(items) > 200:
+        return jsonify({'success': False, 'error': 'items exceeds maximum of 200.'}), 400
+
+    global_logo_base64 = payload.get('logo_base64')
+    global_logo_img = None
+    global_logo_error = None
+    if global_logo_base64 is not None:
+        try:
+            global_logo_img = _decode_logo_base64(global_logo_base64)
+        except ValueError as exc:
+            global_logo_error = str(exc)
+
+    errors = []
+    success_count = 0
+    zip_buffer = BytesIO()
+
+    with zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED) as zip_file:
+        for index, item in enumerate(items):
+            item_id = _get_bulk_item_id(item, index)
+
+            if not isinstance(item, dict):
+                errors.append({'id': item_id, 'error': 'Item must be an object.'})
+                continue
+
+            text = str(item.get('text', '')).strip()
+            if not text:
+                errors.append({'id': item_id, 'error': 'Please provide text.'})
+                continue
+
+            if len(text) > 1000:
+                errors.append({'id': item_id, 'error': 'Text is too long. Maximum 1000 characters allowed.'})
+                continue
+
+            try:
+                logo_img = None
+                if item.get('logo_base64') is not None:
+                    logo_img = _decode_logo_base64(item.get('logo_base64'))
+                elif global_logo_base64 is not None:
+                    if global_logo_error:
+                        raise ValueError(global_logo_error)
+                    logo_img = global_logo_img
+
+                qr_png = _generate_qr_png_bytes(text, logo_img)
+                zip_file.writestr(f'{item_id}.png', qr_png)
+                success_count += 1
+            except Exception as exc:
+                errors.append({'id': item_id, 'error': str(exc)})
+
+        summary = {
+            'total': len(items),
+            'success': success_count,
+            'failed': len(items) - success_count,
+            'errors': errors,
+        }
+        zip_file.writestr('summary.json', json.dumps(summary, indent=2))
+
+    if success_count == 0:
+        return jsonify({'success': False, 'error': 'All items failed.', 'errors': errors}), 422
+
+    zip_buffer.seek(0)
+    response = make_response(zip_buffer.getvalue())
+    response.headers.set('Content-Type', 'application/zip')
+    response.headers.set('Content-Disposition', f'attachment; filename=qr_bulk_{int(time.time())}.zip')
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 def cleanup_old_qr_files():
     """Clean up old QR code temporary files"""
@@ -266,6 +540,9 @@ def get_qr():
     response.headers['Pragma'] = 'no-cache'
     response.headers['Expires'] = '0'
     return response
+
+
+app.register_blueprint(api_bp)
 
 if __name__ == '__main__':
     # Local development server
